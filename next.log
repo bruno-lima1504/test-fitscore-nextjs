@@ -1,0 +1,99 @@
+
+> legal-fitscore@0.1.0 dev
+> npm run services:up && npm run services:wait:database && npm run prisma:generate && npm run migrations:up && npm run db:seed && next dev
+
+
+> legal-fitscore@0.1.0 services:up
+> docker compose -f infra/compose.yml up -d
+
+ Container postgres-fitscore-dev  Running
+
+> legal-fitscore@0.1.0 services:wait:database
+> node infra/scripts/wait-for-postgres.js
+
+
+🔴 Aguardando Postgres aceitar conexões...
+localhost:5432 - accepting connections
+
+
+🟢 Postgres está pronto e aceitando conexões!
+
+
+> legal-fitscore@0.1.0 prisma:generate
+> npx prisma generate
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 59ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: https://pris.ly/tip-0-pulse
+
+
+> legal-fitscore@0.1.0 migrations:up
+> npx prisma migrate deploy
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "local_db", schema "public" at "localhost:5432"
+
+1 migration found in prisma/migrations
+
+
+No pending migrations to apply.
+
+> legal-fitscore@0.1.0 db:seed
+> prisma db seed
+
+Environment variables loaded from .env
+Running seed command `tsx ./prisma/seed.ts` ...
+seed-started
+
+🌱  The seed command has been executed.
+   ▲ Next.js 15.0.3
+   - Local:        http://localhost:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 4.5s
+ ✓ Compiled /src/middleware in 381ms (167 modules)
+ ○ Compiling /api/status ...
+ ✓ Compiled /api/status in 1910ms (322 modules)
+ GET /api/status 200 in 2232ms
+ GET /api/status 200 in 88ms
+ ○ Compiling /api/cron/high-score-report ...
+ ✓ Compiled /api/cron/high-score-report in 1926ms (401 modules)
+🕐 Iniciando relatório automático de high score candidates...
+📊 Encontrados 1 candidatos com score >= 80
+👥 Enviando relatório para 3 avaliador(es)
+✅ Email enviado para avaliador (bruno.lima1504@gmail.com)
+✅ Email enviado para avaliador (novo.avaliador@fitscore.com)
+✅ Email enviado para avaliador (avaliador@fitscore.com)
+📧 Relatório enviado: 3 sucessos, 0 falhas
+📋 Log completo do relatório: {
+  "timestamp": "2025-08-28T14:17:11.357Z",
+  "reportPeriod": {
+    "start": "2025-08-28T02:17:09.575Z",
+    "end": "2025-08-28T14:17:09.575Z"
+  },
+  "candidates": {
+    "total": 1,
+    "highScore90Plus": 0,
+    "list": [
+      {
+        "name": "Test User",
+        "email": "test@example.com",
+        "score": 86,
+        "classification": "Fit Altíssimo"
+      }
+    ]
+  },
+  "emails": {
+    "evaluatorsFound": 3,
+    "successful": 3,
+    "failed": 0
+  }
+}
+ GET /api/cron/high-score-report 200 in 3853ms
