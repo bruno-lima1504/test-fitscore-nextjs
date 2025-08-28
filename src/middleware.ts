@@ -25,6 +25,7 @@ export async function middleware(req: NextRequest) {
     "/api/submit-form",
     "/api/send-result-email",
     "/api/cron",
+    "/api/status",
   ];
 
   const isPublicRoute = publicRoutes.some(
