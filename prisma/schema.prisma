@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  password      String
+  position      String
+  createdAt     DateTime  @default(now())  
+
+  @@map("users")
+}
+
+// Domain Models
+model Candidate {
+  id          String          @id @default(uuid())
+  name        String
+  email       String          @unique
+  createdAt   DateTime        @default(now())
+  submissions FitSubmission[]
+
+  @@map("candidates")
+}
+
+model FitSubmission {
+  id             String    @id @default(uuid())
+  candidateId    String
+  candidate      Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  answers        Json
+  perfScore      Int
+  energyScore    Int
+  cultureScore   Int
+  totalScore     Int
+  classification String // 'Fit Altíssimo' | 'Fit Aprovado' | 'Fit Questionável' | 'Fora do Perfil'
+  createdAt      DateTime  @default(now())
+
+  @@index([totalScore, classification])
+  @@map("fit_submissions")
+}

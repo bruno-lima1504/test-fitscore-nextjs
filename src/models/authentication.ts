@@ -1,0 +1,98 @@
+import user from "./user";
+import password from "./password";
+import { SignJWT, jwtVerify } from "jose";
+import { UnauthorizedError } from "../errors/errors";
+import { IAuthenticatedUser } from "../types/user.types";
+
+async function getAuthenticatedUser(
+  providedEmail: string,
+  providedPassword: string
+) {
+  try {
+    const storedUser = await user.findOneByEmail(providedEmail);
+
+    await validatePassword(providedPassword, storedUser?.password);
+
+    const authenticatedUser = {
+      id_user: storedUser?.id,
+      name: storedUser?.name,
+      email: storedUser?.email,
+      position: storedUser?.position,
+    };
+    return authenticatedUser;
+  } catch (error) {
+    console.error("Error in getAuthenticatedUser:", error);
+    throw new UnauthorizedError({
+      message: "Dados de autenticação não conferem.",
+      action: "Verifique se o email e a senha estão corretos.",
+    });
+  }
+}
+
+async function validatePassword(
+  providedPassword: string,
+  storedPassword: string
+) {
+  const passwordMatch = await password.compare(
+    providedPassword,
+    storedPassword
+  );
+
+  if (!passwordMatch) {
+    throw new UnauthorizedError({
+      message: "Senha não confere.",
+      action: "Verifique se este dado está correto.",
+    });
+  }
+}
+
+async function generateToken(authenticatedUser: IAuthenticatedUser) {
+  const secret = hexToUint8Array(process.env.JWT_SECRET!);
+
+  const token = await new SignJWT({
+    id_user: authenticatedUser.id_user,
+    name: authenticatedUser.name,
+    email: authenticatedUser.email,
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(authenticatedUser.id_user!)
+    .setExpirationTime("1d")
+    .sign(secret);
+
+  return token;
+}
+
+async function validateToken(token: string) {
+  if (!token) {
+    return false;
+  }
+
+  const secret = hexToUint8Array(process.env.JWT_SECRET!);
+  const { payload } = await jwtVerify(token, secret, {
+    algorithms: ["HS256"],
+  });
+
+  if (!payload || !payload.sub) {
+    return false;
+  }
+
+  await user.findOneById(payload.sub as string);
+
+  return payload.sub;
+}
+
+function hexToUint8Array(hexString: string) {
+  const byteArray = new Uint8Array(hexString.length / 2);
+  for (let i = 0; i < byteArray.length; i++) {
+    byteArray[i] = parseInt(hexString.substr(i * 2, 2), 16);
+  }
+  return byteArray;
+}
+
+const authentication = {
+  getAuthenticatedUser,
+  generateToken,
+  validateToken,
+};
+
+export default authentication;
