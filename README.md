@@ -135,6 +135,11 @@ npm run db:migrate
 npm run dev
 ```
 
+#### Login
+
+email: avaliador@fitscore.com
+password: senha123
+
 **Nota**: O cron worker executa automaticamente na Vercel em produção. Para desenvolvimento, os relatórios podem ser testados via requisições diretas à API.
 
 ### 6. Acessar a Aplicação
